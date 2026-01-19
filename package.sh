@@ -23,7 +23,10 @@ zip -q "$OUTPUT_FILE" \
   popup.js \
   icon16.svg \
   icon48.svg \
-  icon128.svg
+  icon128.svg \
+  icon16.png \
+  icon48.png \
+  icon128.png
 
 # 检查打包结果
 if [ $? -eq 0 ]; then
