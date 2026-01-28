@@ -1,5 +1,6 @@
 let allImages = [];
 let selectedImages = new Set();
+let currentPreviewIndex = 0;
 
 async function loadImages() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -23,12 +24,32 @@ function extractImages() {
         url: img.src,
         width: img.naturalWidth,
         height: img.naturalHeight,
+        size: null, // 稍后异步获取
         index: index
       });
     }
   });
 
   return images;
+}
+
+// 获取图片文件大小
+async function fetchImageSize(url) {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    const contentLength = response.headers.get('Content-Length');
+    return contentLength ? parseInt(contentLength) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// 格式化文件大小
+function formatFileSize(bytes) {
+  if (!bytes) return '未知';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
 function displayImages(images) {
@@ -49,10 +70,12 @@ function displayImages(images) {
     card.className = 'img-card';
     card.dataset.index = index;
 
+    const sizeText = img.size ? formatFileSize(img.size) : '获取中...';
     card.innerHTML = `
       <input type="checkbox" class="checkbox" data-index="${index}">
       <img src="${img.url}" alt="图片 ${index + 1}">
       <div class="info">${img.width}x${img.height}</div>
+      <div class="size-info">${sizeText}</div>
     `;
 
     // 图片加载错误处理
@@ -62,6 +85,11 @@ function displayImages(images) {
       imgElement.alt = '加载失败';
       card.querySelector('.info').textContent = '加载失败';
       card.querySelector('.info').style.color = '#f44336';
+    });
+
+    // 双击打开预览
+    card.addEventListener('dblclick', () => {
+      openPreview(index);
     });
 
     card.addEventListener('click', (e) => {
@@ -76,6 +104,17 @@ function displayImages(images) {
     });
 
     gallery.appendChild(card);
+
+    // 异步获取文件大小
+    if (!img.size) {
+      fetchImageSize(img.url).then(size => {
+        img.size = size;
+        const sizeInfo = card.querySelector('.size-info');
+        if (sizeInfo) {
+          sizeInfo.textContent = formatFileSize(size);
+        }
+      });
+    }
   });
 }
 
@@ -212,5 +251,78 @@ function hideStatus() {
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+// ==================== 预览功能 ====================
+
+// 打开预览
+function openPreview(index) {
+  currentPreviewIndex = index;
+  updatePreview();
+  const modal = document.getElementById('previewModal');
+  modal.classList.add('show');
+}
+
+// 关闭预览
+function closePreview() {
+  const modal = document.getElementById('previewModal');
+  modal.classList.remove('show');
+}
+
+// 更新预览内容
+function updatePreview() {
+  const img = allImages[currentPreviewIndex];
+  if (!img) return;
+
+  document.getElementById('previewImage').src = img.url;
+  document.getElementById('previewDimension').textContent = `${img.width} x ${img.height} px`;
+  document.getElementById('previewSize').textContent = formatFileSize(img.size);
+  document.getElementById('previewUrl').textContent = img.url;
+
+  // 更新导航按钮状态
+  document.querySelector('.prev-btn').style.display = currentPreviewIndex > 0 ? 'block' : 'none';
+  document.querySelector('.next-btn').style.display = currentPreviewIndex < allImages.length - 1 ? 'block' : 'none';
+}
+
+// 导航到上一张
+function navigatePrev() {
+  if (currentPreviewIndex > 0) {
+    currentPreviewIndex--;
+    updatePreview();
+  }
+}
+
+// 导航到下一张
+function navigateNext() {
+  if (currentPreviewIndex < allImages.length - 1) {
+    currentPreviewIndex++;
+    updatePreview();
+  }
+}
+
+// 事件监听
+document.querySelector('.close').addEventListener('click', closePreview);
+document.querySelector('.prev-btn').addEventListener('click', navigatePrev);
+document.querySelector('.next-btn').addEventListener('click', navigateNext);
+
+// 点击背景关闭
+document.getElementById('previewModal').addEventListener('click', (e) => {
+  if (e.target.id === 'previewModal') {
+    closePreview();
+  }
+});
+
+// 键盘导航
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('previewModal');
+  if (!modal.classList.contains('show')) return;
+
+  if (e.key === 'Escape') {
+    closePreview();
+  } else if (e.key === 'ArrowLeft') {
+    navigatePrev();
+  } else if (e.key === 'ArrowRight') {
+    navigateNext();
+  }
+});
 
 loadImages();
