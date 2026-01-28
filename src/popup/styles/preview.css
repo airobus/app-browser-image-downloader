@@ -1,0 +1,124 @@
+/* ========================================
+   预览模态框样式 - preview.css
+   包含：模态框、预览图片、导航按钮等
+   ======================================== */
+
+/* ==================== 模态框容器 ==================== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    animation: fadeIn var(--transition-normal) ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==================== 模态框内容 ==================== */
+.modal-content {
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* ==================== 预览图片 ==================== */
+#previewImage {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ==================== 预览信息面板 ==================== */
+.preview-info {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    min-width: 400px;
+    max-width: 600px;
+    box-shadow: var(--shadow-lg);
+}
+
+.info-row {
+    margin: 8px 0;
+    font-size: 13px;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.info-row strong {
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+/* ==================== 关闭按钮 ==================== */
+.close {
+    position: fixed;
+    top: 20px;
+    right: 30px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all var(--transition-fast);
+}
+
+.close:hover {
+    color: var(--danger-color);
+    transform: scale(1.2);
+}
+
+/* ==================== 导航按钮 ==================== */
+.nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 50px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10001;
+    transition: all var(--transition-fast);
+    font-weight: bold;
+    line-height: 1;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.prev-btn {
+    left: 20px;
+}
+
+.next-btn {
+    right: 20px;
+}

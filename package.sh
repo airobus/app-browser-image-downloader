@@ -5,8 +5,9 @@
 
 echo "🎁 开始打包扩展..."
 
-# 定义输出文件名
-OUTPUT_FILE="extension-v1.1.0.zip"
+# 从 manifest.json 读取版本号
+VERSION=$(grep '"version"' manifest.json | sed 's/.*"version": "\([^"]*\)".*/\1/')
+OUTPUT_FILE="extension-v${VERSION}.zip"
 
 # 删除旧的打包文件
 if [ -f "$OUTPUT_FILE" ]; then
@@ -16,11 +17,11 @@ fi
 
 # 打包必需文件
 echo "📦 打包文件..."
-zip -q "$OUTPUT_FILE" \
+zip -rq "$OUTPUT_FILE" \
   manifest.json \
   background.js \
   popup.html \
-  popup.js \
+  src/popup/ \
   icon16.svg \
   icon48.svg \
   icon128.svg \
