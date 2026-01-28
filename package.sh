@@ -6,7 +6,7 @@
 echo "🎁 开始打包扩展..."
 
 # 定义输出文件名
-OUTPUT_FILE="extension-v1.0.0.zip"
+OUTPUT_FILE="extension-v1.1.0.zip"
 
 # 删除旧的打包文件
 if [ -f "$OUTPUT_FILE" ]; then
